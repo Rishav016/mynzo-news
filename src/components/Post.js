@@ -7,8 +7,7 @@ export default function Post({ data, updateBookmarked }) {
   return (
     <div className="grid-items">
       <div className="card">
-        <div className="card-header">{data.name}</div>
-        <div className="card-content">{data.description}</div>
+        <div className="card-content">{data.title}</div>
         <div className="card-footer">
           <a
             className="btn-readmore"

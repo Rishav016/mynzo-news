@@ -4,14 +4,23 @@ import Post from "./Post";
 import { NewsContext } from "../state/NewsContext";
 
 export default function NewsFeed() {
-  const { newsData, bookmarkHandler } = useContext(NewsContext);
-
+  const { newsData, bookmarkHandler, isLoading } = useContext(NewsContext);
   return (
     <div className="grid-container">
-      {newsData &&
-        newsData.map((card, index) => (
-          <Post data={card} updateBookmarked={bookmarkHandler}></Post>
-        ))}
+      {isLoading ? (
+        <div>Loading</div>
+      ) : (
+        <>
+          {newsData &&
+            newsData.map((card, index) => (
+              <Post
+                key={card.id}
+                data={card}
+                updateBookmarked={bookmarkHandler}
+              ></Post>
+            ))}
+        </>
+      )}
     </div>
   );
 }

@@ -4,25 +4,46 @@ const NewsContext = createContext(null);
 
 const NewsProvider = ({ children }) => {
   const [newsData, setNewsData] = useState(null);
+  const [isLoading, setLoader] = useState(false);
+  const [pagination, setPagination] = useState(10);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+    setLoader(true);
     try {
-      const apiKey = process.env.REACT_APP_NEWS_API;
       const response = await fetch(
-        `https://newsapi.org/v2/top-headlines/sources?apiKey=${apiKey}`
+        "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
       );
+
       const jsonData = await response.json();
-      const data = jsonData.sources.map((news) => {
-        return { ...news, bookmarked: false };
-      });
-      setNewsData(data);
+
+      try {
+        const responses = await Promise.all(
+          jsonData
+            .slice(0, 30)
+            .map((newsID) =>
+              fetch(
+                `https://hacker-news.firebaseio.com/v0/item/${newsID}.json?print=pretty`
+              )
+            )
+        );
+
+        const responseData = await Promise.all(
+          responses.map((response) => {
+            return response.json();
+          })
+        );
+        setNewsData(responseData);
+      } catch (e) {
+        console.log("Error fetching item data:", e);
+      }
     } catch (error) {
       console.log("Error fetching data:", error);
     }
+    setLoader(false);
   };
 
   const bookmarkHandler = (id) => {
@@ -37,7 +58,7 @@ const NewsProvider = ({ children }) => {
   };
 
   return (
-    <NewsContext.Provider value={{ newsData, bookmarkHandler }}>
+    <NewsContext.Provider value={{ newsData, bookmarkHandler, isLoading }}>
       {children}
     </NewsContext.Provider>
   );
